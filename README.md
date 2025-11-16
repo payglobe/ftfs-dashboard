@@ -31,20 +31,26 @@ cd ftfs-dashboard
 composer install
 ```
 
-3. Configura il database:
+3. Crea il database e importa lo schema:
+```bash
+mysql -u your_username -p -e "CREATE DATABASE payglobe;"
+mysql -u your_username -p payglobe < schema.sql
+```
+
+4. Configura il database:
 ```bash
 cp config.php.example config.php
 ```
 
-4. Modifica `config.php` con le tue credenziali del database:
+5. Modifica `config.php` con le tue credenziali del database:
 ```php
 $servername = "your_host";
 $username = "your_username";
 $password = "your_password";
-$dbname = "your_database";
+$dbname = "payglobe";
 ```
 
-5. Configura il tuo server web per puntare alla directory del progetto
+6. Configura il tuo server web per puntare alla directory del progetto
 
 ## Struttura del Progetto
 
@@ -52,6 +58,7 @@ $dbname = "your_database";
 ├── index.php              # Entry point - gestisce redirect al login o dashboard
 ├── config.php             # Configurazione database (non versionato)
 ├── config.php.example     # Template configurazione
+├── schema.sql             # Schema database (senza dati)
 ├── composer.json          # Dipendenze PHP
 ├── process_json.php       # Processamento dati JSON
 ├── v2/                    # Dashboard versione 2
