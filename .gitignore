@@ -1,0 +1,23 @@
+# Configuration files with credentials
+config.php
+
+# Vendor directory (managed by Composer)
+/vendor/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Exports directory (may contain generated files)
+/exports/*
+!/exports/.gitkeep
+
+# Claude Code directory
+.claude/

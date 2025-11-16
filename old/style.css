@@ -1,0 +1,562 @@
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    /* Use Roboto, Google's font */
+    font-size: 16px;
+    color: #202124;
+    /* Dark gray text, Google's primary text color */
+    padding-bottom: 50px;
+    background-color: #f8f9fa;
+    /* Light gray background */
+}
+
+/* Buttons */
+.btn {
+    font-weight: 500;
+    /* Slightly bolder font */
+    border-radius: 4px;
+    /* Rounded corners */
+    padding: 8px 16px;
+    /* Adjust padding */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    /* Smooth transitions */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow */
+}
+
+.btn-primary {
+    background-color: #1a73e8;
+    /* Google blue */
+    border-color: #1a73e8;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #174ea6;
+    /* Darker blue on hover */
+    border-color: #174ea6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    /* More prominent shadow on hover */
+}
+
+.btn-secondary {
+    background-color: #f1f3f4;
+    /* Light gray */
+    border-color: #dadce0;
+    /* Slightly darker gray */
+    color: #202124;
+}
+
+.btn-secondary:hover {
+    background-color: #e8eaeb;
+    /* Slightly darker gray on hover */
+    border-color: #dadce0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    /* More prominent shadow on hover */
+}
+
+.btn-success {
+    background-color: #188038;
+    /* Google green */
+    border-color: #188038;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #13632c;
+    /* Darker green on hover */
+    border-color: #13632c;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    /* More prominent shadow on hover */
+}
+
+.btn-danger {
+    background-color: #d93025;
+    /* Google red */
+    border-color: #d93025;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background-color: #a5241c;
+    /* Darker red on hover */
+    border-color: #a5241c;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    /* More prominent shadow on hover */
+}
+
+.btn:focus,
+.btn:active {
+    box-shadow: 0 0 0 0.2rem rgba(26, 115, 232, 0.5);
+    /* Blue focus outline */
+}
+
+/* Table */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    /* White table background */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    /* Subtle table shadow */
+    border-radius: 4px;
+    /* Rounded corners */
+    overflow: hidden;
+    /* Hide overflow for rounded corners */
+}
+
+.table thead {
+    background-color: #f8f9fa;
+    /* Light gray header background */
+}
+
+.table td,
+.table th {
+    width: auto;
+    font-size: smaller;
+    vertical-align: baseline;
+    padding: 1px;
+    /* Reduced padding */
+    border: 1px solid #dadce0;
+    /* Light gray border */
+    height: min-content;
+    white-space: nowrap;
+    /* Prevent text wrapping */
+    overflow: hidden;
+    /* Hide overflowing text */
+    text-overflow: ellipsis;
+    /* Add ellipsis for overflowing text */
+}
+
+.col,
+.col-1,
+.col-10,
+.col-11,
+.col-12,
+.col-2,
+.col-3,
+.col-4,
+.col-5,
+.col-6,
+.col-7,
+.col-8,
+.col-9,
+.col-auto,
+.col-lg,
+.col-lg-1,
+.col-lg-10,
+.col-lg-11,
+.col-lg-12,
+.col-lg-2,
+.col-lg-3,
+.col-lg-4,
+.col-lg-5,
+.col-lg-6,
+.col-lg-7,
+.col-lg-8,
+.col-lg-9,
+.col-lg-auto,
+.col-md,
+.col-md-1,
+.col-md-10,
+.col-md-11,
+.col-md-12,
+.col-md-2,
+.col-md-3,
+.col-md-4,
+.col-md-5,
+.col-md-6,
+.col-md-7,
+.col-md-8,
+.col-md-9,
+.col-md-auto,
+.col-sm,
+.col-sm-1,
+.col-sm-10,
+.col-sm-11,
+.col-sm-12,
+.col-sm-2,
+.col-sm-3,
+.col-sm-4,
+.col-sm-5,
+.col-sm-6,
+.col-sm-7,
+.col-sm-8,
+.col-sm-9,
+.col-sm-auto,
+.col-xl,
+.col-xl-1,
+.col-xl-10,
+.col-xl-11,
+.col-xl-12,
+.col-xl-2,
+.col-xl-3,
+.col-xl-4,
+.col-xl-5,
+.col-xl-6,
+.col-xl-7,
+.col-xl-8,
+.col-xl-9,
+.col-xl-auto {
+    position: relative;
+    /* width: 100%; */
+    padding-right: 15px;
+    /* padding-left: 15px; */
+}
+
+/* Navbar */
+.navbar {
+    background-color: #0c2351;
+    /* Dark blue navbar */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    /* Subtle navbar shadow */
+    padding: 10px 0;
+    /* Adjust padding */
+}
+
+.navbar a {
+    color: #fff;
+    /* White link text */
+}
+
+.navbar-brand {
+    color: #fff;
+    /* White brand text */
+    font-size: 20px;
+    width: auto;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    /* White hamburger icon */
+}
+
+/* Footer */
+.footer {
+    background-color: #0c2351;
+    /* Dark blue footer */
+    padding: 20px 15px;
+    font-size: 0.8em;
+    color: #fff;
+    /* White footer text */
+    border-top: 1px solid #0c2351;
+    /* Add a subtle border */
+}
+
+/* Other Elements */
+.container {
+    margin-left: 10px;
+    margin-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    max-width: 1200px;
+    /* Increased max-width */
+}
+
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.button-group .btn {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 10px;
+}
+
+.row {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.table {
+    padding: 0px 0px;
+}
+
+.pagination .page-link {
+    color: #1a73e8;
+    /* Google blue */
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #1a73e8;
+    /* Google blue */
+    border-color: #1a73e8;
+}
+
+.table-colored {
+    background-color: #f0f8ff;
+    /* Azzurro chiaro */
+}
+
+/* Media Queries for iPhones */
+/* General iPhone Styling (Portrait) */
+@media only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-min-device-pixel-ratio: 3) and (orientation: portrait) {
+    body {
+        font-size: 16px;
+        /* Adjust base font size */
+    }
+
+
+    .container {
+        padding-left: 0px;
+        /* Reduce padding on smaller screens */
+        padding-right: 0px;
+        /* Reduce padding on smaller screens */
+    }
+
+    /* Example: Adjust table font size */
+    table {
+        font-size: 14px;
+    }
+
+    /* Example: Adjust button size */
+    .btn {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    /* Example: Adjust navbar */
+    .navbar-brand {
+        font-size: 18px;
+        /* Adjust logo font size */
+        width: auto;
+        /* Remove the fixed width */
+    }
+
+    /* Example: Adjust chat */
+    #chat-log {
+        height: 200px;
+        /* Adjust chat height */
+    }
+
+    /* Example: Adjust footer */
+    .footer {
+        font-size: 12px;
+        padding: 15px 10px;
+        /* Reduce padding on the footer */
+    }
+
+    /* Adjust table */
+    table {
+        width: 100%;
+        /* Ensure table fits the screen */
+        overflow-x: auto;
+        /* Enable horizontal scrolling if needed */
+        display: block;
+        /* Make table responsive */
+    }
+}
+
+/* General iPhone Styling (Landscape) */
+@media only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-min-device-pixel-ratio: 3) and (orientation: landscape) {
+    body {
+        font-size: 14px;
+        /* Adjust base font size */
+    }
+
+    .container {
+        padding-left: 0px;
+        /* Reduce padding on smaller screens */
+        padding-right: 0px;
+        /* Reduce padding on smaller screens */
+    }
+
+    /* Example: Adjust table font size */
+    table {
+        font-size: 12px;
+    }
+
+    /* Example: Adjust button size */
+    .btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    /* Example: Adjust navbar */
+    .navbar-brand {
+        font-size: 16px;
+        /* Adjust logo font size */
+        width: auto;
+        /* Remove the fixed width */
+    }
+
+    /* Example: Adjust chat */
+    #chat-log {
+        height: 150px;
+        /* Adjust chat height */
+    }
+
+    /* Example: Adjust footer */
+    .footer {
+        font-size: 10px;
+        padding: 10px 5px;
+        /* Reduce padding on the footer */
+    }
+
+    /* Adjust table */
+    table {
+        width: 100%;
+        /* Ensure table fits the screen */
+        overflow-x: auto;
+        /* Enable horizontal scrolling if needed */
+        display: block;
+        /* Make table responsive */
+    }
+}
+
+/* iPhone X, XS, 11 Pro (Portrait) */
+@media only screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) {
+
+    /* Specific styles for iPhone X, XS, 11 Pro in portrait */
+    /* You can add more specific styles here if needed */
+    .navbar-brand {
+        font-size: 16px;
+        /* Adjust logo font size */
+    }
+
+    #chat-log {
+        height: 180px;
+        /* Adjust chat height */
+    }
+}
+
+/* iPhone X, XS, 11 Pro (Landscape) */
+@media only screen and (device-width: 812px) and (device-height: 375px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) {
+
+    /* Specific styles for iPhone X, XS, 11 Pro in landscape */
+    /* You can add more specific styles here if needed */
+    .navbar-brand {
+        font-size: 14px;
+        /* Adjust logo font size */
+    }
+
+    #chat-log {
+        height: 130px;
+        /* Adjust chat height */
+    }
+}
+
+/* iPhone 12, 13, 14, 15 (Portrait) */
+@media only screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) {
+
+    /* Specific styles for iPhone 12, 13, 14, 15 in portrait */
+    /* You can add more specific styles here if needed */
+    .navbar-brand {
+        font-size: 17px;
+        /* Adjust logo font size */
+    }
+
+    #chat-log {
+        height: 190px;
+        /* Adjust chat height */
+    }
+}
+
+/* iPhone 12, 13, 14, 15 (Landscape) */
+@media only screen and (device-width: 844px) and (device-height: 390px) and (orientation: landscape) {
+
+    /* Specific styles for iPhone 12, 13, 14, 15 in landscape */
+    /* You can add more specific styles here if needed */
+    .navbar-brand {
+        font-size: 15px;
+        /* Adjust logo font size */
+    }
+
+    #chat-log {
+        height: 140px;
+        /* Adjust chat height */
+    }
+}
+
+/* iPhone 12 Pro Max, 13 Pro Max, 14 Plus, 15 Plus (Portrait) */
+@media only screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) {
+
+    /* Specific styles for iPhone 12 Pro Max, 13 Pro Max, 14 Plus, 15 Plus in portrait */
+    /* You can add more specific styles here if needed */
+    .navbar-brand {
+        font-size: 19px;
+        /* Adjust logo font size */
+    }
+
+    #chat-log {
+        height: 210px;
+        /* Adjust chat height */
+    }
+}
+
+/* iPhone 12 Pro Max, 13 Pro Max, 14 Plus, 15 Plus (Landscape) */
+@media only screen and (device-width: 926px) and (device-height: 428px) and (orientation: landscape) {
+
+    /* Specific styles for iPhone 12 Pro Max, 13 Pro Max, 14 Plus, 15 Plus in landscape */
+    /* You can add more specific styles here if needed */
+    .navbar-brand {
+        font-size: 17px;
+        /* Adjust logo font size */
+    }
+
+    #chat-log {
+        height: 160px;
+        /* Adjust chat height */
+    }
+}
+
+/* Responsive DataTables */
+@media (max-width: 768px) {
+    .dataTables_wrapper {
+        overflow-x: auto;
+        /* Enable horizontal scrolling on smaller screens */
+    }
+}
+
+/* iPhone 14 Pro, 15 Pro (Portrait) */
+@media only screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) {
+
+    /* Specific styles for iPhone 14 Pro, 15 Pro in portrait */
+    /* You can add more specific styles here if needed */
+    .navbar-brand {
+        font-size: 17px;
+        /* Adjust logo font size */
+    }
+
+    #chat-log {
+        height: 190px;
+        /* Adjust chat height */
+    }
+}
+
+/* iPhone 14 Pro, 15 Pro (Landscape) */
+@media only screen and (device-width: 852px) and (device-height: 393px) and (orientation: landscape) {
+
+    /* Specific styles for iPhone 14 Pro, 15 Pro in landscape */
+    /* You can add more specific styles here if needed */
+    .navbar-brand {
+        font-size: 15px;
+        /* Adjust logo font size */
+    }
+
+    #chat-log {
+        height: 140px;
+        /* Adjust chat height */
+    }
+}
+
+/* Align the filter label with the filter button */
+.row.mb-5 .col-md-2 {
+    padding-left: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* Align items to the bottom */
+}
+
+.row.mb-5 .col-md-2 label {
+    margin-bottom: 0;
+    /* Remove default bottom margin */
+}
+
+.row.mb-2.d-flex.align-items-end {
+    margin-top: 10px;
+    /* Add some top margin to the button group */
+}

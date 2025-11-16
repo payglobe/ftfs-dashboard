@@ -1,0 +1,16 @@
+<?php
+$servername = "YOUR_DB_HOST";
+$username = "YOUR_DB_USER";
+$password = "YOUR_DB_PASSWORD";
+$dbname = "YOUR_DB_NAME";
+define('DB_HOST', 'YOUR_DB_HOST');
+define('DB_USER', 'YOUR_DB_USER');
+define('DB_PASSWORD', 'YOUR_DB_PASSWORD');
+define('DB_NAME', 'YOUR_DB_NAME');
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connessione fallita: " . $conn->connect_error);
+}
+?>
