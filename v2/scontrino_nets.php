@@ -135,13 +135,24 @@ if ($result->num_rows === 0) {
 
 $transaction = $result->fetch_assoc();
 
+// Transazioni rifiutate non hanno authCode -> no scontrino disponibile
+if (empty($transaction['ApprNum'])) {
+    http_response_code(200);
+    echo "<html><body style='font-family: Arial, sans-serif; padding: 40px; text-align: center;'>";
+    echo "<div style='background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 20px; max-width: 400px; margin: 0 auto;'>";
+    echo "<h3 style='color: #92400e; margin: 0 0 10px 0;'>Scontrino non disponibile</h3>";
+    echo "<p style='color: #78350f; margin: 0;'>Transazione rifiutata - nessuno scontrino generato.</p>";
+    echo "</div></body></html>";
+    exit;
+}
+
 // **NEW: Data for the external API call**
 $url = "https://wsent.netsgroup.com:1040/mondoconvenienza/v1/ftfs/receipt/enquiry";
 $tid = $transaction['TermId'];
 $azcode = $transaction['ApprNum'];
 $importo = str_replace(".", "", $transaction['Amount']); // Remove decimal point
 $datatrx = date('Y-m-d\TH:i:s.000\Z', strtotime($transaction['DtPos'])); // Format date
-$rev = ($transaction['TP'] === 'R') ? 'true' : 'false'; // Set 'true' if it's a reversal
+$rev = ($transaction['TP'] === 'R') ? 'Y' : 'N'; // Y/N come da documentazione N&TS
 
 // Log the data for the external API call
 error_log("scontrino_nets.php: External API Data - URL: " . $url);
@@ -151,13 +162,14 @@ error_log("scontrino_nets.php: External API Data - importo: " . $importo);
 error_log("scontrino_nets.php: External API Data - datatrx: " . $datatrx);
 error_log("scontrino_nets.php: External API Data - rev: " . $rev);
 
-// **NEW: Prepare the JSON payload**
+// **NEW: Prepare the JSON payload** (tutti i valori devono essere stringhe!)
+// NOTA: tranId rimosso - causava errore "java.lang.Long cannot be cast to java.lang.String"
 $payload = [
-    "poiId" => $tid,
-    "txDt" => $datatrx,
-    "authCode" => $azcode,
+    "poiId" => strval($tid),
+    "txDt" => strval($datatrx),
+    "authCode" => strval($azcode),
     "isReversal" => $rev,
-    "amount" => $importo
+    "amount" => strval($importo)
 ];
 
 // **NEW: Convert the payload to JSON**
@@ -215,11 +227,43 @@ if ($obj === null && json_last_error() !== JSON_ERROR_NONE) {
     echo "Errore nella decodifica della risposta JSON dall'API esterna.";
     exit;
 }
+
+// **Check resultCode from API**
+// 0=Success, 3=Transaction not found, 4=Transaction not valid, 5=Missing mandatory parameter
+if (isset($obj->resultCode) && $obj->resultCode != 0) {
+    $errorMessages = [
+        1 => "Messaggio JSON non valido",
+        2 => "Lunghezza messaggio JSON non valida",
+        3 => "Transazione non trovata",
+        4 => "Transazione non valida (storno implicito o non contabilizzata)",
+        5 => "Parametro obbligatorio mancante",
+        6 => "Formato dati non valido",
+        9 => "Errore generico"
+    ];
+    $errorMsg = isset($errorMessages[$obj->resultCode]) ? $errorMessages[$obj->resultCode] : "Errore sconosciuto";
+    $apiMsg = isset($obj->resultMessage) ? $obj->resultMessage : "";
+    error_log("scontrino.php: API Error - resultCode: " . $obj->resultCode . ", resultMessage: " . $apiMsg);
+    http_response_code(200);
+    echo "<html><body style='font-family: Arial, sans-serif; padding: 40px; text-align: center;'>";
+    echo "<div style='background: #fee2e2; border: 1px solid #ef4444; border-radius: 8px; padding: 20px; max-width: 400px; margin: 0 auto;'>";
+    echo "<h3 style='color: #dc2626; margin: 0 0 10px 0;'><i class='fas fa-exclamation-triangle'></i> Scontrino non disponibile</h3>";
+    echo "<p style='color: #991b1b; margin: 0;'>" . htmlspecialchars($errorMsg) . "</p>";
+    if (!empty($apiMsg)) {
+        echo "<p style='color: #6b7280; font-size: 12px; margin: 10px 0 0 0;'>Dettaglio: " . htmlspecialchars($apiMsg) . "</p>";
+    }
+    echo "</div></body></html>";
+    exit;
+}
+
 // **Check if resultReceipt is present**
 if (!isset($obj->resultReceipt)) {
     error_log("scontrino.php: resultReceipt not found in JSON response");
-    http_response_code(500);
-    echo "Errore: resultReceipt non trovato nella risposta JSON.";
+    http_response_code(200);
+    echo "<html><body style='font-family: Arial, sans-serif; padding: 40px; text-align: center;'>";
+    echo "<div style='background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 20px; max-width: 400px; margin: 0 auto;'>";
+    echo "<h3 style='color: #92400e; margin: 0 0 10px 0;'>Scontrino non disponibile</h3>";
+    echo "<p style='color: #78350f; margin: 0;'>Il PDF dello scontrino non è stato trovato nella risposta.</p>";
+    echo "</div></body></html>";
     exit;
 }
 

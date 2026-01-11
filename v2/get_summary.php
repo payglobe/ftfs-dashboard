@@ -83,6 +83,16 @@ function buildWhereClause($bu, $startDate, $endDate, $minAmount, $maxAmount, $te
     // Conf filter
     if ($conf !== null && $conf !== "") {
         $confValues = explode(",", $conf);
+        // Tratta lo spazio vuoto come transazione normale (confermata)
+        // Aggiungi sempre ' ' e '' ai valori accettati se 'C' è presente
+        if (in_array('C', $confValues) || in_array(' ', $confValues)) {
+            if (!in_array(' ', $confValues)) {
+                $confValues[] = ' ';
+            }
+            if (!in_array('', $confValues)) {
+                $confValues[] = '';
+            }
+        }
         $placeholders = implode(",", array_fill(0, count($confValues), "?"));
         $whereConditions[] = "ft.Conf IN ($placeholders)";
         $params = array_merge($params, $confValues);
@@ -386,8 +396,8 @@ function getSummaryStats($conn, $bu, $startDate, $endDate, $minAmount, $maxAmoun
     $sql = "SELECT
                 COUNT(*) AS total_transactions,
                 SUM(ft.Amount) AS total_amount,
-                SUM(CASE WHEN ft.Conf = 'C' AND ft.GtResp = '000' THEN 1 ELSE 0 END) AS confirmed_count,
-                SUM(CASE WHEN ft.Conf = 'C' AND ft.GtResp = '000' THEN
+                SUM(CASE WHEN (ft.Conf = 'C' OR ft.Conf = ' ' OR ft.Conf = '') AND ft.GtResp = '000' THEN 1 ELSE 0 END) AS confirmed_count,
+                SUM(CASE WHEN (ft.Conf = 'C' OR ft.Conf = ' ' OR ft.Conf = '') AND ft.GtResp = '000' THEN
                     CASE
                         WHEN ft.TP = 'R' AND ft.Amount > 0 THEN -ft.Amount
                         ELSE ft.Amount

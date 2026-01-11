@@ -116,6 +116,16 @@ function getTableData($conn, $bu, $limit, $offset, $startDate = null, $endDate =
     // Filtro per Conf (es: C=Confermata, E,C=Confermate e Storni)
     if ($conf !== null && $conf !== "") {
         $confValues = explode(",", $conf);
+        // Tratta lo spazio vuoto come transazione normale (confermata)
+        // Aggiungi sempre ' ' e '' ai valori accettati se 'C' è presente
+        if (in_array('C', $confValues) || in_array(' ', $confValues)) {
+            if (!in_array(' ', $confValues)) {
+                $confValues[] = ' ';
+            }
+            if (!in_array('', $confValues)) {
+                $confValues[] = '';
+            }
+        }
         $placeholders = implode(",", array_fill(0, count($confValues), "?"));
         $whereConditions[] = "ft.Conf IN ($placeholders)";
         $params = array_merge($params, $confValues);
@@ -208,11 +218,11 @@ function getTableData($conn, $bu, $limit, $offset, $startDate = null, $endDate =
     // STEP 2: Conditional query based on rowCount
     if ($rowCount !== null && $rowCount <= 300) {
         // ✅ USE JOIN - rowCount <= 300 - Include store data
-        $sql = "SELECT ft.MeId AS codificaStab, ft.TermId AS terminalID, ft.Term AS terminal, st.Modello_pos AS Modello_pos, ft.Pan AS pan, ft.DtPos AS dataOperazione, ft.Amount AS importo, ft.ApprNum AS codiceAutorizzativo, ft.Acquirer AS acquirer, ft.PosAcq AS PosAcq, ft.AId AS AId, ft.PosStan AS PosStan, ft.Conf AS Conf, ft.NumOper AS NumOper, ft.TP AS TP, ft.TPC AS TPC, st.Insegna AS insegna, st.Ragione_Sociale AS Ragione_Sociale, st.indirizzo AS indirizzo, st.citta AS localita, st.prov AS prov, st.cap AS cap, ft.Trid,ft.GtResp FROM ftfs_transactions ft LEFT JOIN " . $storesTable . " st ON st.TerminalID = ft.TermId " . $whereClause . " ORDER BY ft.DtPos DESC LIMIT ? OFFSET ?";
+        $sql = "SELECT ft.MeId AS codificaStab, ft.TermId AS terminalID, ft.Term AS terminal, st.Modello_pos AS Modello_pos, ft.Pan AS pan, ft.DtPos AS dataOperazione, ft.Amount AS importo, ft.ApprNum AS codiceAutorizzativo, ft.Acquirer AS acquirer, ft.PosAcq AS PosAcq, ft.AId AS AId, ft.PosStan AS PosStan, ft.Conf AS Conf, ft.NumOper AS NumOper, ft.TP AS TP, ft.TPC AS TPC, ft.Cont AS Cont, ft.OperExpl AS OperExpl, st.Insegna AS insegna, st.Ragione_Sociale AS Ragione_Sociale, st.indirizzo AS indirizzo, st.citta AS localita, st.prov AS prov, st.cap AS cap, ft.Trid,ft.GtResp FROM ftfs_transactions ft LEFT JOIN " . $storesTable . " st ON st.TerminalID = ft.TermId " . $whereClause . " ORDER BY ft.DtPos DESC LIMIT ? OFFSET ?";
         error_log("✅ Conditional JOIN: rowCount=$rowCount <= 300 - Using JOIN with store data");
     } else {
         // ⚡ NO JOIN - rowCount > 300 - Fast query, no store data
-        $sql = "SELECT ft.MeId AS codificaStab, ft.TermId AS terminalID, ft.Term AS terminal, '' AS Modello_pos, ft.Pan AS pan, ft.DtPos AS dataOperazione, ft.Amount AS importo, ft.ApprNum AS codiceAutorizzativo, ft.Acquirer AS acquirer, ft.PosAcq AS PosAcq, ft.AId AS AId, ft.PosStan AS PosStan, ft.Conf AS Conf, ft.NumOper AS NumOper, ft.TP AS TP, ft.TPC AS TPC, '' AS insegna, '' AS Ragione_Sociale, '' AS indirizzo, '' AS localita, '' AS prov, '' AS cap, ft.Trid,ft.GtResp FROM ftfs_transactions ft " . $whereClause . " ORDER BY ft.DtPos DESC LIMIT ? OFFSET ?";
+        $sql = "SELECT ft.MeId AS codificaStab, ft.TermId AS terminalID, ft.Term AS terminal, '' AS Modello_pos, ft.Pan AS pan, ft.DtPos AS dataOperazione, ft.Amount AS importo, ft.ApprNum AS codiceAutorizzativo, ft.Acquirer AS acquirer, ft.PosAcq AS PosAcq, ft.AId AS AId, ft.PosStan AS PosStan, ft.Conf AS Conf, ft.NumOper AS NumOper, ft.TP AS TP, ft.TPC AS TPC, ft.Cont AS Cont, ft.OperExpl AS OperExpl, '' AS insegna, '' AS Ragione_Sociale, '' AS indirizzo, '' AS localita, '' AS prov, '' AS cap, ft.Trid,ft.GtResp FROM ftfs_transactions ft " . $whereClause . " ORDER BY ft.DtPos DESC LIMIT ? OFFSET ?";
         error_log("⚡ Conditional JOIN: rowCount=$rowCount > 300 - NO JOIN (fast mode, no store data)");
     }
 

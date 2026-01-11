@@ -380,6 +380,11 @@ body {
     color: #92400e;
 }
 
+.status-warning {
+    background: #fed7aa;
+    color: #c2410c;
+}
+
 .transaction-info {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -1197,8 +1202,8 @@ function loadAllData() {
         type: 'GET',
         data: Object.assign({}, currentFilters, {
             start: 0,
-            length: 12, // Load one page at a time
-            conf: 'E,C'
+            length: 12 // Load one page at a time
+            // Nessun filtro conf - mostra tutte le transazioni (confermate, storni, rifiutate)
         }),
         timeout: 30000, // 30 second timeout
         success: function(response) {
@@ -1232,7 +1237,7 @@ function loadAllData() {
     $.ajax({
         url: 'get_summary.php',
         type: 'GET',
-        data: Object.assign({}, currentFilters, {conf: 'E,C'}),
+        data: currentFilters, // Nessun filtro conf per analytics
         timeout: 45000, // 45 second timeout for analytics
         success: function(data) {
             window.statsLoaded = true;
@@ -1301,7 +1306,12 @@ function createTransactionCard(tx) {
     // Determina stato e colore basandosi su Conf e codiceAutorizzativo
     let statusClass, statusText;
 
-    if (tx.Conf === 'C') {
+    // Priorità: Storno implicito > altri stati
+    // Conf='I' (storno implicito) o Conf='A' (stornata implicitamente) o OperExpl='Storno implicito'
+    if (tx.Conf === 'I' || tx.Conf === 'A' || tx.OperExpl === 'Storno implicito') {
+        statusClass = 'status-warning';
+        statusText = 'STORNO IMPL.';
+    } else if (tx.Conf === 'C' || tx.Conf === ' ' || tx.Conf === '') {
         statusClass = 'status-success';
         statusText = 'CONFERMATA';
     } else if (tx.Conf === 'E') {
@@ -1353,8 +1363,8 @@ function createTransactionCard(tx) {
                     <div class="info-value">${tx.pan || '-'}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Autorizzativo</div>
-                    <div class="info-value">${getAuthCodeDisplay(tx.codiceAutorizzativo)}</div>
+                    <div class="info-label">${isStornoImplicito(tx) ? 'Motivo' : (isRejected(tx) ? 'Motivo Rifiuto' : 'Autorizzativo')}</div>
+                    <div class="info-value">${isStornoImplicito(tx) ? '<span style="color: #c2410c; font-weight: 600;">Storno implicito</span>' : (isRejected(tx) ? getGtRespDisplay(tx.GtResp) : getAuthCodeDisplay(tx.codiceAutorizzativo))}</div>
                 </div>
             </div>
             <div class="transaction-meta">
@@ -1384,7 +1394,12 @@ function showDetailSidebar(tx) {
     // Determina stato e colore (stessa logica della card)
     let statusClass, statusText;
 
-    if (tx.Conf === 'C') {
+    // Priorità: Storno implicito > altri stati
+    // Conf='I' (storno implicito) o Conf='A' (stornata implicitamente) o OperExpl='Storno implicito'
+    if (tx.Conf === 'I' || tx.Conf === 'A' || tx.OperExpl === 'Storno implicito') {
+        statusClass = 'status-warning';
+        statusText = 'STORNO IMPL.';
+    } else if (tx.Conf === 'C' || tx.Conf === ' ' || tx.Conf === '') {
         statusClass = 'status-success';
         statusText = 'CONFERMATA';
     } else if (tx.Conf === 'E') {
@@ -1520,12 +1535,12 @@ function closeDetailSidebar() {
 function calculateStatsFromTransactions() {
     // Calculate basic stats from already loaded transactions
     const totalTx = allTransactions.length;
-    const confirmedTx = allTransactions.filter(tx => tx.Conf === 'C').length;
+    const confirmedTx = allTransactions.filter(tx => tx.Conf === 'C' || tx.Conf === ' ' || tx.Conf === '').length;
     const koTx = totalTx - confirmedTx;
-    
+
     // Calculate total amount (only confirmed)
     const confirmedAmount = allTransactions
-        .filter(tx => tx.Conf === 'C')
+        .filter(tx => tx.Conf === 'C' || tx.Conf === ' ' || tx.Conf === '')
         .reduce((sum, tx) => sum + parseFloat(tx.importo || 0), 0);
     
     return {
@@ -1649,8 +1664,8 @@ function loadTransactionsPage(page) {
         type: "GET",
         data: Object.assign({}, currentFilters, {
             start: page * pageSize,
-            length: pageSize,
-            conf: "E,C"
+            length: pageSize
+            // Nessun filtro conf - mostra tutte
         }),
         timeout: 30000,
         success: function(response) {
@@ -1841,12 +1856,40 @@ function getCardType(code) {
 
 function getGtRespDescription(code) {
     const codes = {
-        '000': 'Aprovata', '116': 'Fondi insufficienti', '117': 'Pin errato',
+        '000': 'Approvata', '116': 'Fondi insufficienti', '117': 'Pin errato',
         '121': 'Limite fido superato', '100': 'Negata', '119': 'TRX non permessa',
         '118': 'Carta inesistente', '122': 'Violazione sicurezza',
-        '911': 'Timeout', '912': 'Irraggiungibile'
+        '911': 'Timeout', '912': 'Irraggiungibile', '114': 'Carta non abilitata',
+        '120': 'Transazione non permessa', '200': 'Rifiutata generica',
+        '904': 'Errore formato', '907': 'Emittente non disponibile',
+        '909': 'Errore sistema', '910': 'Errore emittente'
     };
     return codes[code] || code;
+}
+
+function isRejected(tx) {
+    // Transazione rifiutata se GtResp != '000' o no codice autorizzativo
+    // Ma NON se è uno storno implicito (Conf='I' o Conf='A')
+    if (isStornoImplicito(tx)) {
+        return false; // Storno implicito non è un rifiuto
+    }
+    return tx.GtResp !== '000' || !tx.codiceAutorizzativo;
+}
+
+function isStornoImplicito(tx) {
+    // Storno implicito SOLO se:
+    // 1. La transazione era stata inizialmente approvata (GtResp = '000')
+    // 2. Ma poi invalidata per storno implicito (Conf='I' o 'A')
+    // Se GtResp != '000' è un RIFIUTO reale, non storno implicito!
+    if (tx.GtResp && tx.GtResp !== '000') {
+        return false; // È un rifiuto reale (PIN errato, fondi insufficienti, ecc.)
+    }
+    return tx.Conf === 'I' || tx.Conf === 'A' || tx.OperExpl === 'Storno implicito';
+}
+
+function getGtRespDisplay(code) {
+    const desc = getGtRespDescription(code);
+    return '<span style="color: #ef4444; font-weight: 600;">' + desc + '</span>';
 }
 </script>
 
