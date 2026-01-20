@@ -41,6 +41,32 @@ Questa applicazione fornisce un'interfaccia web avanzata per monitorare le trans
 
 ---
 
+#### `storni.php` (10KB)
+**Dashboard Possibili Storni Impliciti**
+- Monitoraggio transazioni con `Conf=' '` (non confermate)
+- 5 stat cards:
+  - Storni Impliciti Certi
+  - Possibili Storni
+  - In Attesa (<5 min)
+  - Confermate (DDL)
+  - Importo a Rischio
+- Tabella dettagliata con:
+  - Stato (badge colorato)
+  - Terminal ID, NumOper
+  - Data/ora, Importo
+  - Flag Autorizzata (SI/NO)
+  - Codice autorizzazione
+  - Next NumOper
+  - Minuti dopo
+  - Punto vendita
+- Filtri: Data inizio/fine, Solo critici
+- Auto-refresh ogni 60 secondi
+- Navigazione integrata con dashboard principale
+
+**URL:** `/v2/storni.php`
+
+---
+
 #### `login.php` (12KB)
 **Pagina di autenticazione utenti**
 - Design moderno con animazioni CSS
@@ -158,6 +184,54 @@ Questa applicazione fornisce un'interfaccia web avanzata per monitorare le trans
 - `ApprNum` - Codice autorizzazione
 - `PosAcq` - Circuito (VISA, MasterCard, etc.)
 - `Acquirer` - Nome acquirer
+
+---
+
+#### `get_pending_confirmations.php` (4KB)
+**API per identificazione possibili storni impliciti**
+
+**Endpoint:** `GET /get_pending_confirmations.php`
+
+**Parametri query:**
+- `startDate` - Data inizio (default: 7 giorni fa)
+- `endDate` - Data fine (default: ora)
+- `onlyCritical` - Solo casi critici (true/false)
+
+**Risposta JSON:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "termId": "10404012",
+      "numOper": 60,
+      "dataNonConfermata": "2026-01-19 11:57:58",
+      "amount": 912.08,
+      "apprNum": "170073",
+      "gtResp": "000",
+      "nextNumOper": 42,
+      "stato": "CONTATORE_RESETTATO",
+      "autorizzata": true
+    }
+  ],
+  "stats": {
+    "totale": 50,
+    "storno_implicito_certo": 30,
+    "possibile_storno_implicito": 5,
+    "in_attesa": 2,
+    "contatore_resettato": 8,
+    "confermata_ddl": 5,
+    "importo_a_rischio": 1250.00
+  }
+}
+```
+
+**Logica di classificazione:**
+- `STORNO_IMPLICITO_CERTO`: NextNumOper = NumOper (stessa operazione ripetuta)
+- `POSSIBILE_STORNO_IMPLICITO`: Nessuna TX successiva dopo 5+ minuti
+- `IN_ATTESA`: Nessuna TX successiva, ma < 5 minuti
+- `CONTATORE_RESETTATO`: NextNumOper < NumOper (terminale riavviato)
+- `CONFERMATA_DDL`: NextNumOper = NumOper + 1 (DDL effettuato)
 
 ---
 
@@ -519,6 +593,20 @@ if (!isset($_SESSION['username'])) {
 ---
 
 ## 📝 Note di Versione
+
+### v2.1 (Gennaio 2026)
+- ✨ **Nuovo modulo Possibili Storni Impliciti** (`storni.php`)
+- ✨ API `get_pending_confirmations.php` per identificazione automatica storni
+- ✨ Dashboard dedicata con statistiche real-time
+- ✨ Auto-refresh ogni 60 secondi
+- ✨ Classificazione automatica:
+  - STORNO_IMPLICITO_CERTO: Prossima TX ha stesso NumOper
+  - POSSIBILE_STORNO_IMPLICITO: Nessuna TX dopo 5+ minuti
+  - IN_ATTESA: Meno di 5 minuti dalla TX
+  - CONTATORE_RESETTATO: Terminale riavviato
+  - CONFERMATA_DDL: NumOper incrementato (DDL effettuato)
+- ✨ Calcolo importo a rischio per TX autorizzate non confermate
+- ✨ Link navigazione tra dashboard principale e storni
 
 ### v2.0 (Novembre 2025)
 - ✨ Nuova dashboard con grafici ECharts

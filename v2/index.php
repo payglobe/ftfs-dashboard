@@ -127,6 +127,10 @@ include 'config.php';
                     <i class="fas fa-home" style="margin-right: 0.5rem;"></i>
                     Home
                 </a>
+                <a href="storni.php" class="btn d-flex align-items-center" style="background: #fef3c7; color: #92400e; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; border: none; transition: all 0.3s;" onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef3c7'">
+                    <i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>
+                    Possibili Storni
+                </a>
             </div>
         </div>
     </div>
@@ -1426,105 +1430,163 @@ function showDetailSidebar(tx) {
     $('#detailDate').text(date);
     $('#detailStatusBadge').html(`<div class="transaction-status ${statusClass}">${statusText}</div>`);
 
+    // Helper functions per sidebar
+    const v = (val) => val || '-';
+    const vNum = (val) => val !== null && val !== undefined ? val : '-';
+    const getContDisplay = (cont) => {
+        if (cont === 'Y') return '<span style="color: #10b981;">Si</span>';
+        if (cont === 'N') return '<span style="color: #ef4444;">No</span>';
+        return '-';
+    };
+    const getFvFlDisplay = (fvfl) => {
+        if (fvfl === '1' || fvfl === 1) return '<span style="color: #10b981;">OK</span>';
+        if (fvfl === '0' || fvfl === 0) return '<span style="color: #f59e0b;">Stornata Impl.</span>';
+        if (fvfl === '9' || fvfl === 9) return '<span style="color: #ef4444;">Op. Doppia</span>';
+        return fvfl || '-';
+    };
+    const formatTime = (ms) => ms ? ms + ' ms' : '-';
+
     const detailsHTML = `
+        <ul class="nav nav-tabs" id="detailTabs" role="tablist" style="margin-bottom: 15px; border-bottom: 2px solid #e5e7eb;">
+            <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#pane-generale" style="font-weight: 600;"><i class="fas fa-info-circle"></i> Generale</a></li>
+            <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#pane-tecnico" style="font-weight: 600;"><i class="fas fa-microchip"></i> Dati Tecnici</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="pane-generale">
+                <div class="detail-section">
+                    <div class="detail-section-title"><i class="fas fa-exchange-alt"></i> Transazione</div>
+                    <div class="detail-grid">
+                        <div class="detail-item"><div class="detail-item-label">ID Transazione</div><div class="detail-item-value" style="font-family: monospace; font-size: 11px;">${v(tx.Trid)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Tipo Operazione</div><div class="detail-item-value">${getOperationType(tx.TP)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Cod. Autorizzativo</div><div class="detail-item-value">${getAuthCodeDisplay(tx.codiceAutorizzativo)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Esito Gateway</div><div class="detail-item-value">${getGtRespDescription(tx.GtResp)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Stato Conferma</div><div class="detail-item-value">${getConfDisplay(tx.Conf)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Contabilizzata</div><div class="detail-item-value">${getContDisplay(tx.Cont)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Num. Operazione</div><div class="detail-item-value">${vNum(tx.NumOper)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">STAN POS</div><div class="detail-item-value">${vNum(tx.PosStan)}</div></div>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-section-title"><i class="fas fa-credit-card"></i> Carta e Pagamento</div>
+                    <div class="detail-grid">
+                        <div class="detail-item"><div class="detail-item-label">PAN</div><div class="detail-item-value" style="font-family: monospace;">${v(tx.pan)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Tipo Carta</div><div class="detail-item-value">${getCardType(tx.TPC)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Circuito</div><div class="detail-item-value">${v(tx.PosAcq)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Acquirer</div><div class="detail-item-value">${v(tx.acquirer)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">BIN</div><div class="detail-item-value">${v(tx.Bin)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Valuta</div><div class="detail-item-value">${v(tx.Currency) || 'EUR'}</div></div>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-section-title"><i class="fas fa-store"></i> Punto Vendita</div>
+                    <div class="detail-grid">
+                        <div class="detail-item"><div class="detail-item-label">Terminal ID</div><div class="detail-item-value" style="font-family: monospace;">${v(tx.terminalID)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Merchant ID</div><div class="detail-item-value" style="font-family: monospace;">${v(tx.codificaStab)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Codice SIA</div><div class="detail-item-value">${v(tx.SiaCode)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Modello POS</div><div class="detail-item-value">${v(tx.Modello_pos)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Insegna</div><div class="detail-item-value">${v(tx.insegna)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Ragione Sociale</div><div class="detail-item-value">${v(tx.Ragione_Sociale)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Indirizzo</div><div class="detail-item-value">${v(tx.indirizzo)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Localita</div><div class="detail-item-value">${v(tx.localita)} (${v(tx.prov)}) ${v(tx.cap)}</div></div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="tab-pane fade" id="pane-tecnico">
+                <div class="detail-section">
+                    <div class="detail-section-title"><i class="fas fa-clock"></i> Tempi e Performance</div>
+                    <div class="detail-grid">
+                        <div class="detail-item"><div class="detail-item-label">Data POS</div><div class="detail-item-value">${v(tx.dataOperazione)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Data Trans</div><div class="detail-item-value">${v(tx.DtTrans)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Data Inserimento</div><div class="detail-item-value">${v(tx.DtIns)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Tempo Aut.</div><div class="detail-item-value">${formatTime(tx.AutTime)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Tempo DB</div><div class="detail-item-value">${formatTime(tx.DBTime)}</div></div>
+                        <div class="detail-item"><div class="detail-item-label">Tempo Totale</div><div class="detail-item-value">${formatTime(tx.TOTTime)}</div></div>
+                    </div>
+                </div>
         <div class="detail-section">
-            <div class="detail-section-title">Informazioni Transazione</div>
+            <div class="detail-section-title"><i class="fas fa-id-card"></i> Identificativi</div>
             <div class="detail-grid">
-                <div class="detail-item">
-                    <div class="detail-item-label">Tipo Operazione</div>
-                    <div class="detail-item-value">${getOperationType(tx.TP)}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">Tipo Carta</div>
-                    <div class="detail-item-value">${getCardType(tx.TPC)}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">Codice Autorizzativo</div>
-                    <div class="detail-item-value">${getAuthCodeDisplay(tx.codiceAutorizzativo)}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">Esito</div>
-                    <div class="detail-item-value">${getGtRespDescription(tx.GtResp)}</div>
-                </div>
+                <div class="detail-item"><div class="detail-item-label">ID Record</div><div class="detail-item-value">${vNum(tx.id)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">AId</div><div class="detail-item-value">${v(tx.AId)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">Acid</div><div class="detail-item-value">${v(tx.Acid)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">Payment ID</div><div class="detail-item-value">${v(tx.PaymentId)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">CCode</div><div class="detail-item-value">${v(tx.CCode)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">Cat. Merceologica</div><div class="detail-item-value">${v(tx.CatMer)}</div></div>
             </div>
         </div>
-
         <div class="detail-section">
-            <div class="detail-section-title">Dati Pagamento</div>
+            <div class="detail-section-title"><i class="fas fa-check-circle"></i> Stato e Flag</div>
             <div class="detail-grid">
-                <div class="detail-item">
-                    <div class="detail-item-label">PAN</div>
-                    <div class="detail-item-value">${tx.pan || '-'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">Circuito</div>
-                    <div class="detail-item-value">${tx.PosAcq || '-'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">Acquirer</div>
-                    <div class="detail-item-value">${tx.acquirer || '-'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">AID</div>
-                    <div class="detail-item-value">${tx.AId || '-'}</div>
-                </div>
+                <div class="detail-item"><div class="detail-item-label">Resp. Acquirer</div><div class="detail-item-value">${v(tx.RespAcq)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">Num. Tentativi</div><div class="detail-item-value">${vNum(tx.NumTent)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">FvFl</div><div class="detail-item-value">${getFvFlDisplay(tx.FvFl)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">VaFl</div><div class="detail-item-value">${v(tx.VaFl)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">OperExpl</div><div class="detail-item-value">${v(tx.OperExpl)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">Terminal</div><div class="detail-item-value">${v(tx.terminal)}</div></div>
             </div>
         </div>
-
         <div class="detail-section">
-            <div class="detail-section-title">Punto Vendita</div>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <div class="detail-item-label">Terminal ID</div>
-                    <div class="detail-item-value">${tx.terminalID || '-'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">Terminal AQ</div>
-                    <div class="detail-item-value">${tx.terminal || '-'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">Modello POS</div>
-                    <div class="detail-item-value">${tx.Modello_pos || '-'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">Codifica Stab</div>
-                    <div class="detail-item-value">${tx.codificaStab || '-'}</div>
-                </div>
+            <div class="detail-section-title"><i class="fas fa-microchip"></i> Dati EMV</div>
+            <div class="detail-grid" style="grid-template-columns: 1fr;">
+                <div class="detail-item"><div class="detail-item-label">TVR</div><div class="detail-item-value" style="font-family: monospace; font-size: 10px;">${v(tx.TVR)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">CVR</div><div class="detail-item-value" style="font-family: monospace; font-size: 10px;">${v(tx.CVR)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">IAD</div><div class="detail-item-value" style="font-family: monospace; font-size: 10px;">${v(tx.IAD)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">AIP</div><div class="detail-item-value" style="font-family: monospace; font-size: 10px;">${v(tx.AIP)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">ACrypt</div><div class="detail-item-value" style="font-family: monospace; font-size: 10px;">${v(tx.ACrypt)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">TTQ</div><div class="detail-item-value" style="font-family: monospace; font-size: 10px;">${v(tx.TTQ)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">TCAP</div><div class="detail-item-value" style="font-family: monospace; font-size: 10px;">${v(tx.TCAP)}</div></div>
             </div>
         </div>
-
         <div class="detail-section">
-            <div class="detail-section-title">Informazioni Commerciante</div>
+            <div class="detail-section-title"><i class="fas fa-shield-alt"></i> Altri Dati Tecnici</div>
             <div class="detail-grid">
-                <div class="detail-item">
-                    <div class="detail-item-label">Insegna</div>
-                    <div class="detail-item-value">${tx.insegna || '-'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">Ragione Sociale</div>
-                    <div class="detail-item-value">${tx.Ragione_Sociale || '-'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">Indirizzo</div>
-                    <div class="detail-item-value">${tx.indirizzo || '-'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-item-label">LocalitÃƒÂ </div>
-                    <div class="detail-item-value">${(tx.localita || '-') + ' (' + (tx.prov || '-') + ')'}</div>
-                </div>
+                <div class="detail-item"><div class="detail-item-label">ISR</div><div class="detail-item-value" style="font-family: monospace;">${v(tx.ISR)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">IST</div><div class="detail-item-value" style="font-family: monospace;">${v(tx.IST)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">IAutD</div><div class="detail-item-value" style="font-family: monospace;">${v(tx.IAutD)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">CID</div><div class="detail-item-value">${v(tx.CID)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">HATC</div><div class="detail-item-value">${v(tx.HATC)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">DFN</div><div class="detail-item-value">${v(tx.DFN)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">CED</div><div class="detail-item-value">${v(tx.CED)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">FFI</div><div class="detail-item-value">${v(tx.FFI)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">UN</div><div class="detail-item-value">${v(tx.UN)}</div></div>
             </div>
         </div>
-
-        <div class="detail-actions">
-            <button class="btn-modern btn-primary" onclick="viewReceipt('${tx.Trid}')">
-                <i class="fas fa-receipt"></i> Visualizza Scontrino
-            </button>
+        <div class="detail-section">
+            <div class="detail-section-title"><i class="fab fa-bitcoin"></i> Crypto (se presente)</div>
+            <div class="detail-grid">
+                <div class="detail-item"><div class="detail-item-label">Crypto Currency</div><div class="detail-item-value">${v(tx.CryptCurr)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">Crypto Type</div><div class="detail-item-value">${v(tx.CryptType)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">Crypto Amount</div><div class="detail-item-value">${v(tx.CrypAmnt)}</div></div>
+                <div class="detail-item"><div class="detail-item-label">Crypto TD</div><div class="detail-item-value">${v(tx.CryptTD)}</div></div>
+            </div>
         </div>
+    </div>
+</div>
+<div class="detail-actions" style="margin-top: 15px;">
+    <button class="btn-modern btn-primary" onclick="viewReceipt('${tx.Trid}')">
+        <i class="fas fa-receipt"></i> Visualizza Scontrino
+    </button>
+</div>
     `;
 
     $('#detailBody').html(detailsHTML);
     sidebar.addClass('active');
     overlay.addClass('active');
+}
+
+function getConfDisplay(conf) {
+    const states = {
+        'C': '<span style="color: #10b981;">Confermata</span>',
+        ' ': '<span style="color: #10b981;">Confermata</span>',
+        '': '<span style="color: #10b981;">Confermata</span>',
+        'E': '<span style="color: #ef4444;">Storno Esplicito</span>',
+        'I': '<span style="color: #f59e0b;">Storno Implicito</span>',
+        'A': '<span style="color: #f59e0b;">Stornata Impl.</span>',
+        'D': '<span style="color: #ef4444;">Storno NOP</span>',
+        'N': '<span style="color: #10b981;">PreAuth Conf.</span>'
+    };
+    return states[conf] || conf || '-';
 }
 
 function closeDetailSidebar() {
